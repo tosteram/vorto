@@ -1,0 +1,15 @@
+-json:espdic.js
+-shortname:espdic
+-name:Esperanto-English (Denisowski)
+-version:2015-08-02
+-author:Paul Denisowski
+-langs:eo-en
+-format:plain
+-color:
+-conv1:no_conv
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_plain
+-schonline:
+-url:
+-remark:***

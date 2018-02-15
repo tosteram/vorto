@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="icon" href="favicon.ico">
+<title>Esperantaj Vortaroj</title>
+<!-- Date:
+	V1.0	2014-07-12
+	V2.0	2014-08-01; v2.1 08-03
+	V3.0	2018-01-23 Online dictionaries
+-->
+<!-- Copyright (C) 2013-2018, Tositaka Teramoto & Fukumoto Hirotsugu
+ Permission to use, copy, modify, distribute and sell this software
+ and its documentation for any purpose is hereby granted without fee,
+ provided that the above copyright notice appear in all copies and
+ that both that copyright notice and this permission notice appear
+ in supporting documentation. 
+ This file is provided "as is" without express or implied warranty.
+-->
+<script src="js/ajax.js" type="text/javascript"></script>
+<script src="js/eventhandling.js" type="text/javascript"></script>
+<script src="js/init.js" type="text/javascript"></script>
+<script src="js/regilo.js" type="text/javascript"></script>
+
+<style type="text/css">
+	img.ibutton {border-style:none; vertical-align:top; cursor:pointer;}
+	/*img.xbutton:hover {background-color:lightgrey;}*/
+	span.sibutton {background-color:white;
+		position:relative; top:-2px; cursor:pointer;}
+	span.sbutton {background-color:#dddddd; padding:2px;
+		position:relative; top:-2px; cursor:pointer;}
+	span.sbutton_b {background-color:#dddddd; padding:2px; border:solid 1px grey;
+		border-radius:5px;
+		position:relative; top:-2px; vertical-align:bottom; cursor:pointer;}
+	span.h {color:firebrick;} /*highlight the match*/
+
+	/*input.button {font-size:20px;}*/
+	select {font-size:11pt;}
+	/*.button-c {border-bottom:solid 1px #800030; color:#800030; margin:5px 2px;
+		cursor:pointer;}
+	.button-c:hover {background-color:yellow;}*/
+	/* Show 'X' button in the text field */
+	input[type="search"] {
+		-webkit-appearance: searchfield; }
+	input[type="search"]::-webkit-search-cancel-button {
+		-webkit-appearance: searchfield-cancel-button; }
+
+	/* "k"=header, "r"=entry item,"g"=entry item(grey) */
+	div.r {border-bottom:solid 1px grey; padding-top:1px; cursor:pointer;}
+	div.r:hover {background-color:yellow;}
+	div.g {border-bottom:solid 1px grey; padding-top:1px; background-color:lightgrey;
+		cursor:pointer;}
+	div.g:hover {background-color:yellow;}
+	div.k {font-weight:bold;border-bottom:solid 1px grey; padding-top:2px;
+		background-color:#b0ffb0; text-align:center;}
+
+	div.pool {display:none; border:solid 1px green; margin-bottom:3px;}
+	div.poolhead {height:26px; padding-left:5px; padding-top:1px;}
+	div.defshead {border:solid 1px grey; padding-left:5px; padding-top:1px;
+		height:26px; background-color:#eeffee;}
+	div.def {border-bottom:dashed 1px lightgrey; padding-top:2px;}
+
+	/* page buttons: Available, Current, None*/
+	span.pageA {display:inline; padding:1px; background-color:white; color:black;
+		font-size:12pt; border:solid 1px grey; cursor:pointer;}
+	span.pageC {display:inline; padding:1px; background-color:steelblue; color:white;
+		font-size:12pt;}
+	span.pageN {display:none;}
+
+	/* Dialog */
+	div.dialog {position:absolute; border:solid 2px lightgrey; padding:3px; z-index:50;
+		background-color:#f8f8f8; font-size:11pt;}
+	div.titlebar {margin-bottom:5px; padding:2px; height:26px; 
+		color:white; background-color:#7070a0; text-align:center; cursor:pointer;}
+	h6 {margin:5px 0px 0px 0px; font-size:11pt;}
+	.dict_n {border:solid 1px grey; padding:0px 2px; margin-left:5px;
+		color:grey; background-color:darkgrey;}
+	.page {border:solid 1px #d0d0d0;
+		padding:5px;
+		display:none;
+	}
+	.tab {border:solid 1px #a0a0a0; border-bottom:none;
+		-moz-border-radius-topleft: 4px; -moz-border-radius-topright: 4px;
+		border-top-left-radius: 4px; border-top-right-radius: 4px;
+		padding: 2px 5px 1px; margin: 0px;
+		font-weight:bold; color:grey;
+		cursor:pointer;
+	}
+</style>
+</head>
+
+<body topmargin="0px" leftmargin="5px" rightmargin="5px" style="font-family:sans-serif; font-size:12pt;">
+
+<!-- === HEAD === -->
+<div id="entrypane" style="position:absolute; top=0px; padding:5px;">
+<form>
+	<div style="height:24px;">
+		<!-- Dictionary -->
+		<span class="sibutton" onclick="showSelDictsDialog(true)">
+			<img src="sistem_img/Book24.png" id="select_dicts" class="ibutton">
+			<span id="dict_name" style="color:forestgreen;"></span>
+		</span> &nbsp;
+		<!-- Options button -->
+		<img id="img_colorize" src="sistem_img/ColorizeX24.png" class="ibutton"
+			onclick="toggleColorize()">&nbsp;
+		<img id="img_use_pool" src="sistem_img/FolderX24.png" class="ibutton"
+			onclick="togglePool()">&nbsp;
+		<!-- help -->
+		<a id="help_doc" href="" target="_blank">
+			<img src="sistem_img/Help24.png" id="help" class="ibutton">
+		</a>
+	</div>
+
+	<!-- Search -->
+	<div style="height:26px; margin-top:10px; border:solid 1px grey; padding:2px; background-color:#dddddd;">
+		<img id="img_history" class="ibutton" src="sistem_img/Down24.png" onclick="showSearchHistory()">
+		<!-- span class="sbutton" onclick="showSearchHistory()">▼</span -->
+		<input type="search" id="searchstr"
+			style="width:170px; border:none; margin:0px; font-size:20px;">
+		&nbsp;
+		<span id="lbl_search" class="sbutton" onclick="search()"></span>
+		&nbsp;
+		<!-- search history -->
+		<select id="selectSchHistory"
+			style="display:none; position:absolute; margin:0px;width:145px; z-index:51;"
+			onclick="onSearchHistory()" onblur="this.style.display='none'">
+		</select>
+
+	  <!-- Search modes -->
+    <div id="searchMode" style="height:24px; margin-top:10px; display:block;">
+      <select id="search_range" style="font-size:12pt;">
+        <option id="lbl_entries_prefix" value="entries prefix"></option>
+        <option id="lbl_entries_partial" value="entries partial"></option>
+        <option id="lbl_entries_word" value="entries complete"></option>
+        <option id="lbl_roots_word" value="root word"></option>
+        <option id="lbl_entiretext_partial" value="entiretext partial"></option>
+        <option id="lbl_entiretext_word" value="entiretext word"></option>
+      </select>
+    </div>
+	</div>
+</form>
+</div> <!-- end. ENTRY pane -->
+
+
+<!-- DEF Pane -->
+<div id="defpane"
+	style="position:absolute; top:110px; bottom:0px; left:0px; right:0px; padding:5px; overflow:auto;">
+	<div id="pool" class="pool">
+		<div class="poolhead">
+			<span class="sibutton" onclick="foldPool()">
+			 <img id="img_pool" src="" class="ibutton">&nbsp;
+			 <span id="lbl_pool" style="font-weight:bold; color:green;"></span>
+			</span>&nbsp;
+			<span id="lbl_emptyPool" class="sbutton_b" style="display:none;"
+				onclick="emptyPool()"></span>
+		</div>
+		<div id="poolContent"></div>
+	</div>
+	<div id="def_title" class="defshead">
+		<span id="def_hits" style="font-weight:bold;">★</span>&nbsp;
+		<span id="lbl_deleteAll" class="sbutton_b" style="display:none;"
+			onclick="deleteAllDefs()"></span>
+		<span id="lbl_toPool" class="sbutton_b" style="display:none;"
+			onclick="moveAllToPool()"></span>
+		<!-- page buttons -->
+		<span id="lbl_page" style="display:none;"></span>
+		<span id="page1" class="pageN"
+			onclick="onPageClicked(1)">&nbsp; 1 </span>&nbsp;
+		<span id="page2" class="pageN"
+			onclick="onPageClicked(2)">&nbsp; 2 </span>&nbsp;
+		<span id="page3" class="pageN"
+			onclick="onPageClicked(3)">&nbsp; 3 </span>&nbsp;
+		<span id="page4" class="pageN"
+			onclick="onPageClicked(4)">&nbsp; 4 </span>&nbsp;
+		<span id="page5" class="pageN"
+			onclick="onPageClicked(5)">&nbsp; 5 </span>&nbsp;
+	</div>
+	<div id="defs" style="position:relative;bottom:0px;"></div>
+</div> <!-- end. defpane -->
+
+
+<!-- dictionary selection dialog -->
+<div id="seldicts" class="dialog" style="display:none; top:35px; left:5px; width:290px;">
+	<!-- list of dictionaries -->
+</div>
+
+<!-- Option dialog -->
+
+<!-- floating objects -->
+<span id="tip" style="display:none; border:solid 1px grey; 
+padding:2px; background-color:#ffffc0; position:absolute; 
+z-index:100;"></span>
+
+<div id="messagebox" class="dialog" style="display:none; min-height:100px; min-width:250px; top:70px; left:50px; opacity:1.0; filter:alpha(opacity=100); z-index:60;">
+	<div id="lbl_msgtitle" class="titlebar">
+		<img src="sistem_img/Xbutton24.png" class="ibutton" id="imgClose2" align="right"
+			onclick="closeMessageBox()">
+	</div>
+	<div id="msgtext" style="padding:10px;"></div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+-json:butler.js
+-shortname:butler
+-name:Esperanto-English (Butler)
+-version:1967
+-author:Montagu C. Butler
+-langs:eo-en
+-format:html
+-color:
+-conv1:chapeligu
+-conv2:chapeligu
+-makeentry:makeEntry_std2
+-makedef:makeDef_html
+-schonline:
+-url:
+-remark:***

@@ -1,0 +1,15 @@
+-json:kajiwaes.js
+-shortname:kajiwaes
+-name:（梶）和エス辞典
+-version:1957
+-author:梶弘和編
+-langs:ja-eo
+-format:plain
+-color:
+-conv1:romaji_kana
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_plain2
+-schonline:
+-url:
+-remark:***

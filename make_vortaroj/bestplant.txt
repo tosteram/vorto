@@ -1,0 +1,15 @@
+-json:bestplant.js
+-shortname:bestplant
+-name:日エス対照動植物名リスト
+-version:1988-1944
+-author:野村忠綱編
+-langs:ja-eo
+-format:html
+-color:
+-conv1:romaji_kana
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_html
+-schonline:
+-url:
+-remark:***

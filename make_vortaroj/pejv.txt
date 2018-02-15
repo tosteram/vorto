@@ -1,0 +1,15 @@
+-json:pajv181/pejv.js
+-shortname:pejv
+-name:実用エスペラント小辞典
+-version:v1.81 2017-01-30
+-author:広高正昭編
+-langs:eo-ja
+-format:plain
+-color:
+-conv1:chapeligu
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_plain
+-schonline:
+-url:
+-remark:***

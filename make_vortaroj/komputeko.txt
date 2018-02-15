@@ -1,0 +1,15 @@
+-json:komputeko.js
+-shortname:komputeko
+-name:Komputeko, English-Esperanto
+-version:Majo 2015
+-author:Komputeko
+-langs:en-eo
+-format:html
+-color:
+-conv1:no_conv
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_html
+-schonline:
+-url:
+-remark:***

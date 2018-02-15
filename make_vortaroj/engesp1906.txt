@@ -1,0 +1,15 @@
+-json:engesp1906.js
+-shortname:engesp1906
+-name:English-Esperanto (1906)
+-version:1906
+-author:O'Connor and Hayes
+-langs:en-eo
+-format:plain
+-color:
+-conv1:no_conv
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_plain
+-schonline:
+-url:
+-remark:***

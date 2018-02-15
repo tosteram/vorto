@@ -1,0 +1,13 @@
+# .gitignore
+nimcache/
+test/
+not_used/
+*~
+.DS_Store
+
+# executables
+vortoserver
+client
+make_vortaroj/jsontodb
+make_vortaroj/read_pejv
+

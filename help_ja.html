@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<!-- 2014-06-27 作成
+	2018-2-15 for Vorto online -->
+<title>エスペラント辞書 ヘルプ</title>
+<style type="text/css">
+	h1 {font-size:15pt; border-bottom:2px solid lightgreen; padding-bottom:1px;}
+	h2 {font-size:13pt; border-bottom:1px dashed grey; padding-bottom:1px;
+		margin-top:40px; margin-bottom:10px;}
+	span.sbutton_b {background-color:#dddddd; padding:2px; border:solid 1px grey;
+		border-radius:5px;
+		position:relative; top:-2px; vertical-align:bottom; cursor:pointer;}
+	span.strong {border:solid 1px grey; font-weight:bold; padding:2px;}
+	span.strong2 {background-color:#e0e0e0; font-weight:bold; padding:2px;}
+	table {border:solid 1px grey; border-collapse:collapse;}
+	td {border:solid 1px grey; padding-left:2px; padding-right:3px; min-width:10px;}
+	.small {font-size:smaller;}
+	.faint {font-size:smaller; color:darkgrey;}
+	.indent1 {margin-bottom:5px; padding-left:1.2em; text-indent:-1.2em;}
+</style>
+</head>
+
+<body style="max-width:600px; margin-left:5px; line-height:1.3em; font-family:sans-serif; font-size:12pt; color:#404040;">
+<h1>オンライン・エスペラント辞書(Vorto)の使い方</h1>
+
+<div style="color:red">
+［注意］現在テスト版を公開しています。使い方、表示など変わることがあります。
+スマートフォンでも使えるようにしていますが、一部機能しないところがあります。
+</div>
+<br>
+
+テキストボックスに検索文字列を入力して、[Enter]キーを押します。<br>
+このとき、「検索範囲」が<br>
+<ul>
+	<li><span class="strong">見出し語、語根</span> の場合<br>
+	<span class="strong2">和エス辞書</span> のときは、<u>ひらがな</u> または 
+	<u>ローマ字</u> で入力してください。<br>
+	<div class="indent1">※ カタカナ語の長音は、
+		ー[長音記号]、－[全角ハイフン]、または母音で入力します。<br>
+		例: ケースは「けーす」「け－す」「けえす」と入力。
+		ローマ字の場合は 「keesu」</div>
+	<div class="indent1">※ ローマ字入力の注意点:
+		基本的に訓令式ローマ字ですが、ヘボン式でも入力できます。<br>
+		外来語音: てぃ→thi、でぃ→dhi、とぅ→thu、どぅ→dhu<br>
+		小文字は l (エル)を付けます: la→ぁ、lya→ゃ、など<br>
+		「ん」の後のあ行、や行音は、その間に区切り文字(' - 空白)をいれます:<br>
+		例: zen'in, zen-in, zen in → 「ぜんいん」、zenin は「ぜにん」、
+		zennin は「ぜんにん」</div>
+	<br>
+	<div class="indent1"><span class="strong2">エス和(など)</span> のときは、
+		<u>アルファベット</u> で入力してください。</div>
+	<div class="indent1">※ X記法が使えます:
+		ĉ→cx, ĝ→gx, ĥ→hx, ĵ→jx, ŝ→sx, ŭ→ux<br>
+		例: ŝanĝiは、sxangxiと入力。もし可能ならŝanĝiでもOKです</div>
+	<br>
+	</li>
+	<li><span class="strong">全文</span> の場合<br>
+	<div class="indent1">※ 入力された <u>アルファベット、漢字かな</u>
+		に一致する文字列を検索します。
+		入力文字列がテキストの一部に一致していれば、ヒットします。</div>
+	<div class="indent1">※ アルファベット入力では、X記法が使えます。</div>
+	<div class="indent1">※「全文」は、
+		見出し語[漢字とひらがな]及び訳語、用例を含みます</div>
+	</li>
+</ul>
+
+<br>
+
+<div class="indent1">☆ 
+検索結果は「見出し語」でソートされて並びます。<br>
+[注意] 和エス辞書の場合、日本語見出しはひらがなのUnicode順に並びます。
+例:「あけ」で検索すると、「あけ、あけがた、あけくれ…」、
+「あげ」で検索すると、「あげ、あげあし、あげく…」が表示されます。</div>
+
+<div class="indent1">☆ 
+検索結果は最大５００件まで表示されます。
+</div>
+
+<div class="indent1">☆ 
+	辞書を複数個選択していると、同時に複数辞書を検索します。</div>
+
+<div class="indent1">☆ <span class="small">[小ワザ]</span> 太字で表示されている"見出し語"をクリックすると、
+辞書名が約１秒間表示されます。</div>
+
+<div class="indent1">☆ <span class="small">[小ワザ]</span>
+ESCキーを押すと、入力された検索文字列が消去されます。
+</div>
+
+<span class="faint">(例えばエス和と和エスの辞書を同時に見出し語検索するというのは、
+余り意味を成しませんが、辞書を切換えずに両辞書を利用できるという利点があります…)</span><br>
+<br>
+
+<span class="sbutton_b">全消去</span> ボタンをクリックすると、内容がクリアされます。<br>
+<br>
+
+<b>検索履歴</b> : &nbsp;
+ボタン(<img src="sistem_img/Down24.png">)をクリック、または[↓]キーを押すと、
+今までの入力履歴が表示されます。マウスで選択クリック、または矢印キー[↑] [↓]で
+選択して[Enter]キーを押すと、検索を開始します。
+何もせず消すときは、履歴ボックス以外の所をクリックするか、[Esc]キーを押してください。<br>
+<br>
+<div class="indent1">☆ 履歴はCookieに保存されます。
+ページを閉じても、再度表示すると以前の履歴が表示されます。</div>
+
+<span style="color:red">現在スマートフォンでは履歴が表示されません。</span><br>
+
+<h2 id="sel_dicts">辞書の選択</h2>
+画面左上のボタン(<img src="sistem_img/Book24.png">)または辞書名をクリックすると、
+辞書選択ダイアログが表示されます。検索対象の辞書を選択して、
+[OK]ボタンをクリックしてください。<br>
+<br>
+<div class="indent1">☆ 複数個の辞書を選択できます。</div>
+<div class="indent1">☆ 選択辞書はCookieに保存されます。
+ページを閉じても、再度表示すると以前の選択状態のまま続行できます。</div>
+<div class="indent1 faint">☆ダイアログのタイトルバーを
+	マウス左ボタンを押しながらドラッグすると、移動させることができます。</div>
+
+<h2 id="sch_opts">検索モード</h2>
+ドロップダウン・リストから、次のモードが選べます。<br>
+<ol>
+	<li><b>見出し検索</b><br>
+		<ul>
+			<li><span class="strong2">"abc..." </span>
+			入力された文字列で始まる見出し語を検索します。<br>
+			和エスの例: かご → 籠、駕籠、加護、化合、過言 がヒットします。</li>
+			<li><span class="strong2">"...abc..."</span>
+			入力文字列を含む見出し語<br>
+			例: かご → 赤子、籠、駕籠、加護、化合、過言、シカゴ… などがヒットします。</li>
+			<li><span class="strong2">"abc"</span>
+			完全に一致する見出し語<br>
+			例: かご → 籠、駕籠、加護 がヒットします。</li>
+		</ul>
+	</li>
+	<li><b>語根検索</b><br>
+		<ul>
+			<li><span class="strong2">"abc"</span>
+			見出し語から末尾の a, e, i, o(oj) を除いた語根を検索</li>
+		</ul>
+	</li>
+	<li><b>全文検索</b><br>
+		<ul>
+			<li><span class="strong2">"...abc..."</span>
+			入力文字列を含む箇所を、見出しと定義（訳）内容から検索</li>
+			<li><span class="strong2">"abc"</span>
+			同上。ただし、見出しは入力文字列と完全一致のものだけを選択する。</li>
+		</ul>
+	</li>
+</ol>
+
+
+<h2 id="disp_opts">辞書別色分け</h2>
+ボタン<img src="sistem_img/colorizeX24.png">/<img src="sistem_img/colorize24.png">を
+<u>ON</u>にすると、辞書別に色分けされます。<br>
+
+
+<h2 id="pool">収納箱について</h2>
+ボタン<img src="sistem_img/FolderX24.png">/<img src="sistem_img/Open24.png">を
+<u>ON</u>にすると、収納箱が使えます。<br>
+「収納箱」とは、一時的に見出し(訳語など)を溜めておく場所です。<br>
+<br>
+次のように、使います:<br>
+○ 検索で表示された見出しの頭の <img src="sistem_img/Add20.png"> をクリックすると、その見出しが収納箱に移動します。
+収納箱は、右パネルの上部に表示されます。<br>
+○<span class="sbutton_b">すべて収納</span> ボタンをクリックすると、
+表示されている検索結果がすべて収納箱に移動します。<br>
+<br>
+収納箱の各見出しの頭の <img src="sistem_img/Remove20.png"> をクリックすると、その見出し内容が削除されます。<br>
+[空にする]ボタンをクリックすると、収納箱が空(から)になり、消えます。<br>
+収納箱左上の <img src="sistem_img/Open24.png"> をクリックすると、収納箱が閉じられ、内容が隠されます。
+<img src="sistem_img/Closed24.png">をクリックすると、再び内容が表示されます。<br>
+<br>
+[注1] 収納箱を表示中に、「収納箱を使う」をOFFにしても、収納箱は残っています。<br>
+[注2] <span class="sbutton_b">全消去</span> をクリックしても、
+収納箱の内容は消去されません。<br>
+<br>
+
+<h2 id="dicts">収録辞書</h2>
+
+<table>
+	<tr><td colspan="2"><b>和エス辞典</b></td></tr>
+	<tr><td>編者名、版</td><td>梶弘和編、1957年</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: 福本博次氏が電子化 2011-2012年<br>
+		○ 著作権者: 梶弘和<br>
+		○ 添付文書: <a href="vortaroj/kajiwaes.html">kajiwaes.html</a><br>
+		</td></tr>
+
+	<tr><td colspan="2"><b>実用エスペラント小辞典</b></td></tr>
+	<tr><td>編者名、版</td><td>広高正昭編、v1.81、2017-01-30</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://www.vastalto.com/jpn/#e-Dic<br>
+		○ ライセンス: 非商業的利用に限り自由かつ無料<br>
+		○ 添付説明書（<a href="vortaroj/pejv_gvidilo.txt">gvidilo.txt</a>, <a href="vortaroj/pejv_legumin.txt">legumin.txt</a>）<br>
+	</td></tr>
+<!--
+	<tr><td colspan="2"><b>電子版エスペラント日本語単語集</b></td></tr>
+	<tr><td>編者名、版</td><td>広高正昭,小野隆夫 他編、1997-01-06</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://www.vastalto.com/jpn/#e-Dic<br>
+		○ ライセンス: フリーウエア。基本的に著作権フリー，無料で自由に利用，再配布可。<br>
+		○ 添付説明書: <a href="vortaroj/PEVL-instr.txt">PEVL-instr.txt</a><br>
+	</td></tr>
+-->
+	<tr><td colspan="2"><b>日エス対照動植物名リスト</b></td></tr>
+	<tr><td>編者名、版</td><td>野村忠綱 1988-1994</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://vastalto.com/arkivo/jenbp.html<br>
+		○ ライセンス: 野村氏に収録許可取得済み<br>
+		○ 添付文書: <a href="vortaroj/bestplant.html">bestplant.html</a><br>
+	</td></tr>
+
+	<tr><td colspan="2"><b>Kabe, Vortaro de Esperanto</b></td></tr>
+	<tr><td>編者名、版</td><td>Kazimierz Bein, 1910</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://esperanto-akademio.wikispaces.com/space/content<br>
+			&nbsp;&nbsp;(リスト中の Kabe-1910-03-Sept-2014.pdf)<br>
+		○ ライセンス: (Public domain)<br>
+		○ 添付文書: <a href="vortaroj/kabe.html">kabe.html</a><br>
+		<span style="color:#cc0033;">
+		※現在収録のファイルは、校正途中のものです。</span>
+		</td></tr>
+
+	<tr><td colspan="2"><b>Esperanto-English Dictionary</b></td></tr>
+	<tr><td>編者名、版</td><td>Paul Denisowski, 2 August 2015</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://www.denisowski.org/Esperanto/ESPDIC/espdic_readme.htm<br>
+		○ ライセンス: Creative Commons Attribution 3.0 Unported License<br>
+		</td></tr>
+
+	<tr><td colspan="2"><b>Esperanto-English Dictionary</b></td></tr>
+	<tr><td>編者名、版</td><td>Montagu C. Butler, 1967</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://esperilo.be/butler.htm<br>
+		電子化 Bernhard Pabst. Berlino 2014. (2014-06-26改訂)<br>
+		○ 著作権者: Montagu C. Butler / The British Esperanto Association<br>
+		○ 添付文書: <a href="vortaroj/butler-intro.html">butler-intro.html</a>,
+		<a href="vortaroj/butler-appendix.html">butler-appendix.html</a><br>
+		<span style="color:#cc0033;">
+		※収録ファイルは現在、まだ充分に校正されていません。</span>
+	</td></tr>
+
+	<tr><td colspan="2"><b>English-Esperanto Dictionary</b><td></tr>
+	<tr><td>編者名、版</td><td>John Charles O'Connor and Charles Frederic Hayes, 1906</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: http://www.gutenberg.org/files/16967/16967-0.txt<br>
+		○ ライセンス: Project Gutenberg License<br>
+		○ 添付文書: <a href="vortaroj/PG16967-0.txt">PG16967-0.txt</a><br>
+	</td></tr>
+
+	<tr><td colspan="2"><b>Komputeko, English-Esperanto</b><tr>
+	<tr><td>編者名、版</td><td>Komputeko.net (La reta projekto de E@I), 2015</td></tr>
+	<tr><td>備考</td>
+		<td>○ ソース: komputeko.net より XLSファイル入手 (2015年5月版)<br>
+		○ ライセンス: Komputeko創始者Yves Nevelsteen氏 により許可済<br>
+		○ 添付文書: <a href="vortaroj/komputeko.html">komputeko.html</a><br>
+	</td></tr>
+
+</table>
+
+
+<h2 id="about">Vorto について</h2>
+※ <a href="history_ja.html">改訂履歴</a><br>
+※ 不具合報告、お問い合わせ、ご意見、ご要望などは <img src="sistem_img/Email-address.gif">へどうぞ。<br>
+※ ホーム・ページ <a href="http://esperanto.mond.jp/index.html#espvortaroj">(Verda Monteto)</a><br>
+(2018-2-15)<br>
+</body>
+</html>

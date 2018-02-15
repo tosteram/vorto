@@ -1,0 +1,110 @@
+Dictionary Server
+-----------------
+2018-1-9, 1-13
+
+DB structures
+
+Dict
+ ID       : Dict ID
+ Name     : dictionary name
+ ShortName: short name
+ Version  : version and date
+ Author   : author(s)
+ Langs    : eo-ja, ja-eo, eo-eo, en-eo, ...
+ format   : plain, html,...
+ color    : background colour
+ conv1    : function name for converting the input string (Entry Search)
+ conv2    :  "                 "                    (Entire Text Search)
+ makeEntry: function name for showing an entry word(s)
+ makeDef  :  "            for showing definitions
+ schonline: function name for searching online
+ url      : Online URL
+ Remark   : other info (URL etc.)
+ 
+Word
+ ID       : Word ID
+ DictID   :
+ Word     : search word/words, Kana (all in lower case, remove '-' '.')
+ Entry    : entry word/words
+ Root     : root word (without suffix, all in lower case, remove '-' '.')
+ DefID    :
+ SubEntry : subentry number 1,2,... (0=all)
+ (PoS : Part of Speach: verb noun adjective adverb preposition ...
+
+Def
+ ID       : Def ID
+ DictID   :
+ WordID   :
+ Defs     : definitions
+
+Indices
+--------
+idxword : create index if not exists idxword on word(word, dictid)
+idxroot : create index if not exists idxroot on word(root, dictid)
+
+
+--------
+FullText
+ ID
+ Lang   : es=Esperanto ja=Japanese en=English ...
+ Text   : search text
+ DictID
+ WordID
+ DefID
+
+----------------------------------------------------
+# collation
+# https://www.sqlite.org/c3ref/create_collation.html
+
+int sqlite3_create_collation(
+  sqlite3*, 
+  const char *zName, 
+  int eTextRep, 
+  void *pArg,
+  int(*xCompare)(void*,int,const void*,int,const void*)
+);
+int sqlite3_create_collation_v2(
+  sqlite3*, 
+  const char *zName, 
+  int eTextRep, 
+  void *pArg,
+  int(*xCompare)(void*,int,const void*,int,const void*),
+  void(*xDestroy)(void*)
+);
+
+# Collation Needed Callbacks
+# https://www.sqlite.org/c3ref/collation_needed.html
+
+int sqlite3_collation_needed(
+  sqlite3*, 
+  void*, 
+  void(*)(void*,sqlite3*,int eTextRep,const char*)
+);
+int sqlite3_collation_needed16(
+  sqlite3*, 
+  void*,
+  void(*)(void*,sqlite3*,int eTextRep,const void*)
+);
+
+-----
+int sqlite3_create_collation(db, "utf8-esperanto", SQLITE_UTF8, NULL, esp_compare);
+  int esp_compare(void* arg, int n1, const void* s1, int n2, const void* s2)
+
+proc create_collation(db:pointer, name:cstring, txtrep:int, arg:pointer, callback:pointer): cint {. importc:"sqlite3_create_ollation", header:"collate.h".}
+
+proc esp_compare(arg:pointer, n1:cint, s1:cstring, n2:cint, s2:cstring): int {. exportc .}
+    return -,0,+
+-----
+proc collation_needed(db:pointer, arg:pointer, f_collation:pointer): cint {. importc:"sqlite3_collation_neede", header:"collate.h".}
+
+proc f_collation(arg:pointer, db:pointer, txtrep:int, name:cstring): int {. exportc .}
+
+
+-----
+SQL
+create index if not exists index-name on table (column collate collat-name)
+
+... order by EXPR collate collat-name
+[expr]: EXPR collate collat-name
+
+* vim: ts=4 sw=4 et

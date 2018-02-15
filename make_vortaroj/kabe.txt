@@ -1,0 +1,15 @@
+-json:kabe.js
+-shortname:kabe
+-name:Vortaro de Esperanto, Kabe
+-version:1910
+-author:Kazimierz Bein
+-langs:eo-eo
+-format:html
+-color:
+-conv1:chapeligu
+-conv2:chapeligu
+-makeentry:makeEntry_std
+-makedef:makeDef_html
+-schonline:
+-url:
+-remark:***
