@@ -665,6 +665,9 @@ function moveToPool(entryDiv) {
 	var pool= getPool();
 	pool.content.appendChild(entryDiv);	//move to Pool
 	document.getElementById("lbl_emptyPool").style.display="inline";
+	if (document.getElementById("defs").childNodes.length==0) {
+		document.getElementById("lbl_toPool").style.display= "none";
+	}
 }
 
 function moveAllToPool() {
@@ -690,6 +693,9 @@ function emptyPool() {
 function removeFromPool(div) {
 	var pool= getPool();
 	pool.content.removeChild(div);
+	if (pool.content.childNodes.length==0) {
+		document.getElementById("lbl_emptyPool").style.display= "none";
+	}
 }
 
 function foldPool() {

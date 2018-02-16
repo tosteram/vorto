@@ -23,7 +23,7 @@
 </style>
 </head>
 
-<body style="max-width:600px; margin-left:5px; line-height:1.3em; font-family:sans-serif; font-size:12pt; color:#404040;">
+<body style="max-width:600px; margin-left:5px; line-height:1.4em; font-family:sans-serif; font-size:12pt; color:#404040;">
 <h1>オンライン・エスペラント辞書(Vorto)の使い方</h1>
 
 <div style="color:red">
@@ -93,7 +93,7 @@ ESCキーを押すと、入力された検索文字列が消去されます。
 余り意味を成しませんが、辞書を切換えずに両辞書を利用できるという利点があります…)</span><br>
 <br>
 
-<span class="sbutton_b">全消去</span> ボタンをクリックすると、内容がクリアされます。<br>
+<span class="sbutton_b">全消去</span> ボタンをクリックすると、検索結果がクリアされます。<br>
 <br>
 
 <b>検索履歴</b> : &nbsp;
@@ -127,23 +127,24 @@ ESCキーを押すと、入力された検索文字列が消去されます。
 			入力された文字列で始まる見出し語を検索します。<br>
 			和エスの例: かご → 籠、駕籠、加護、化合、過言 がヒットします。</li>
 			<li><span class="strong2">"...abc..."</span>
-			入力文字列を含む見出し語<br>
+			入力文字列を含む見出し語。<br>
 			例: かご → 赤子、籠、駕籠、加護、化合、過言、シカゴ… などがヒットします。</li>
 			<li><span class="strong2">"abc"</span>
-			完全に一致する見出し語<br>
+			完全に一致する見出し語。<br>
 			例: かご → 籠、駕籠、加護 がヒットします。</li>
 		</ul>
 	</li>
 	<li><b>語根検索</b><br>
 		<ul>
 			<li><span class="strong2">"abc"</span>
-			見出し語から末尾の a, e, i, o(oj) を除いた語根を検索</li>
+			見出し語から末尾の a, e, i, o(oj) を除いた語根を検索。<br>
+			語尾の a,e,i,o,oj を除いて入力してください。</li>
 		</ul>
 	</li>
 	<li><b>全文検索</b><br>
 		<ul>
 			<li><span class="strong2">"...abc..."</span>
-			入力文字列を含む箇所を、見出しと定義（訳）内容から検索</li>
+			入力文字列を含む箇所を、見出しと定義（訳）内容から検索。</li>
 			<li><span class="strong2">"abc"</span>
 			同上。ただし、見出しは入力文字列と完全一致のものだけを選択する。</li>
 		</ul>
@@ -179,23 +180,22 @@ ESCキーを押すと、入力された検索文字列が消去されます。
 
 <h2 id="dicts">収録辞書</h2>
 
-<table>
-	<tr><td colspan="2"><b>和エス辞典</b></td></tr>
-	<tr><td>編者名、版</td><td>梶弘和編、1957年</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: 福本博次氏が電子化 2011-2012年<br>
-		○ 著作権者: 梶弘和<br>
-		○ 添付文書: <a href="vortaroj/kajiwaes.html">kajiwaes.html</a><br>
-		</td></tr>
-
-	<tr><td colspan="2"><b>実用エスペラント小辞典</b></td></tr>
-	<tr><td>編者名、版</td><td>広高正昭編、v1.81、2017-01-30</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: http://www.vastalto.com/jpn/#e-Dic<br>
-		○ ライセンス: 非商業的利用に限り自由かつ無料<br>
-		○ 添付説明書（<a href="vortaroj/pejv_gvidilo.txt">gvidilo.txt</a>, <a href="vortaroj/pejv_legumin.txt">legumin.txt</a>）<br>
-	</td></tr>
+<div class="indent1">
+	<span class="strong">和エス辞典</span><br>
+	編者名、版: 梶弘和編、1957年<br>
+	○ ソース: 福本博次氏が電子化 2011-2012年<br>
+	○ 著作権者: 梶弘和<br>
+	○ 添付文書: <a href="vortaroj/kajiwaes.html">kajiwaes.html</a><br>
+</div>
+<div class="indent1">
+	<span class="strong">実用エスペラント小辞典</span><br>
+	編者名、版: 広高正昭編、v1.81、2017-01-30<br>
+	○ ソース: http://www.vastalto.com/jpn/#e-Dic<br>
+	○ ライセンス: 非商業的利用に限り自由かつ無料<br>
+	○ 添付説明書（<a href="vortaroj/pejv_gvidilo.txt">gvidilo.txt</a>, <a href="vortaroj/pejv_legumin.txt">legumin.txt</a>）<br>
+</div>
 <!--
+<div>
 	<tr><td colspan="2"><b>電子版エスペラント日本語単語集</b></td></tr>
 	<tr><td>編者名、版</td><td>広高正昭,小野隆夫 他編、1997-01-06</td></tr>
 	<tr><td>備考</td>
@@ -203,68 +203,66 @@ ESCキーを押すと、入力された検索文字列が消去されます。
 		○ ライセンス: フリーウエア。基本的に著作権フリー，無料で自由に利用，再配布可。<br>
 		○ 添付説明書: <a href="vortaroj/PEVL-instr.txt">PEVL-instr.txt</a><br>
 	</td></tr>
+</div>
 -->
-	<tr><td colspan="2"><b>日エス対照動植物名リスト</b></td></tr>
-	<tr><td>編者名、版</td><td>野村忠綱 1988-1994</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: http://vastalto.com/arkivo/jenbp.html<br>
-		○ ライセンス: 野村氏に収録許可取得済み<br>
-		○ 添付文書: <a href="vortaroj/bestplant.html">bestplant.html</a><br>
-	</td></tr>
+<div class="indent1">
+	<span class="strong">日エス対照動植物名リスト</span><br>
+	編者名、版: 野村忠綱 1988-1994<br>
+	○ ソース: http://vastalto.com/arkivo/jenbp.html<br>
+	○ ライセンス: 野村氏に収録許可取得済み<br>
+	○ 添付文書: <a href="vortaroj/bestplant.html">bestplant.html</a><br>
+</div>
 
-	<tr><td colspan="2"><b>Kabe, Vortaro de Esperanto</b></td></tr>
-	<tr><td>編者名、版</td><td>Kazimierz Bein, 1910</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: http://esperanto-akademio.wikispaces.com/space/content<br>
-			&nbsp;&nbsp;(リスト中の Kabe-1910-03-Sept-2014.pdf)<br>
-		○ ライセンス: (Public domain)<br>
-		○ 添付文書: <a href="vortaroj/kabe.html">kabe.html</a><br>
-		<span style="color:#cc0033;">
-		※現在収録のファイルは、校正途中のものです。</span>
-		</td></tr>
+<div class="indent1">
+	<span class="strong">Kabe, Vortaro de Esperanto</span><br>
+	編者名、版: Kazimierz Bein, 1910<br>
+	○ ソース: http://esperanto-akademio.wikispaces.com/space/content<br>
+	○ ライセンス: (Public domain)<br>
+	○ 添付文書: <a href="vortaroj/kabe.html">kabe.html</a><br>
+	<span style="color:#cc0033;">
+	※現在収録のファイルは、校正途中のものです。</span>
+</div>
 
-	<tr><td colspan="2"><b>Esperanto-English Dictionary</b></td></tr>
-	<tr><td>編者名、版</td><td>Paul Denisowski, 2 August 2015</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: http://www.denisowski.org/Esperanto/ESPDIC/espdic_readme.htm<br>
-		○ ライセンス: Creative Commons Attribution 3.0 Unported License<br>
-		</td></tr>
+<div class="indent1">
+	<span class="strong">Esperanto-English Dictionary</span><br>
+	編者名、版: Paul Denisowski, 2 August 2015<br>
+	○ ソース: http://www.denisowski.org/Esperanto/ESPDIC/espdic_readme.htm<br>
+	○ ライセンス: Creative Commons Attribution 3.0 Unported License<br>
+</div>
 
-	<tr><td colspan="2"><b>Esperanto-English Dictionary</b></td></tr>
-	<tr><td>編者名、版</td><td>Montagu C. Butler, 1967</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: http://esperilo.be/butler.htm<br>
-		電子化 Bernhard Pabst. Berlino 2014. (2014-06-26改訂)<br>
-		○ 著作権者: Montagu C. Butler / The British Esperanto Association<br>
-		○ 添付文書: <a href="vortaroj/butler-intro.html">butler-intro.html</a>,
-		<a href="vortaroj/butler-appendix.html">butler-appendix.html</a><br>
-		<span style="color:#cc0033;">
-		※収録ファイルは現在、まだ充分に校正されていません。</span>
-	</td></tr>
+<div class="indent1">
+	<span class="strong">Esperanto-English Dictionary</span><br>
+	編者名、版: Montagu C. Butler, 1967<br>
+	○ ソース: http://esperilo.be/butler.htm<br>
+	&nbsp; 電子化 Bernhard Pabst. Berlino 2014. (2014-06-26改訂)<br>
+	○ 著作権者: Montagu C. Butler / The British Esperanto Association<br>
+	○ 添付文書: <a href="vortaroj/butler-intro.html">butler-intro.html</a>,
+	<a href="vortaroj/butler-appendix.html">butler-appendix.html</a><br>
+	<span style="color:#cc0033;">
+	※収録ファイルは現在、まだ充分に校正されていません。</span>
+</div>
 
-	<tr><td colspan="2"><b>English-Esperanto Dictionary</b><td></tr>
-	<tr><td>編者名、版</td><td>John Charles O'Connor and Charles Frederic Hayes, 1906</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: http://www.gutenberg.org/files/16967/16967-0.txt<br>
-		○ ライセンス: Project Gutenberg License<br>
-		○ 添付文書: <a href="vortaroj/PG16967-0.txt">PG16967-0.txt</a><br>
-	</td></tr>
+<div class="indent1">
+	<span class="strong">English-Esperanto Dictionary</span><br>
+	編者名、版: John Charles O'Connor and Charles Frederic Hayes, 1906<br>
+	○ ソース: http://www.gutenberg.org/files/16967/16967-0.txt<br>
+	○ ライセンス: Project Gutenberg License<br>
+	○ 添付文書: <a href="vortaroj/PG16967-0.txt">PG16967-0.txt</a><br>
+</div>
 
-	<tr><td colspan="2"><b>Komputeko, English-Esperanto</b><tr>
-	<tr><td>編者名、版</td><td>Komputeko.net (La reta projekto de E@I), 2015</td></tr>
-	<tr><td>備考</td>
-		<td>○ ソース: komputeko.net より XLSファイル入手 (2015年5月版)<br>
-		○ ライセンス: Komputeko創始者Yves Nevelsteen氏 により許可済<br>
-		○ 添付文書: <a href="vortaroj/komputeko.html">komputeko.html</a><br>
-	</td></tr>
-
-</table>
+<div class="indent1">
+	<span class="strong">Komputeko, English-Esperanto</span><br>
+	編者名、版: Komputeko.net (La reta projekto de E@I), 2015<br>
+	○ ソース: komputeko.net より XLSファイル入手 (2015年5月版)<br>
+	○ ライセンス: Komputeko創始者Yves Nevelsteen氏 により許可済<br>
+	○ 添付文書: <a href="vortaroj/komputeko.html">komputeko.html</a><br>
+</div>
 
 
 <h2 id="about">Vorto について</h2>
 ※ <a href="history_ja.html">改訂履歴</a><br>
 ※ 不具合報告、お問い合わせ、ご意見、ご要望などは <img src="sistem_img/Email-address.gif">へどうぞ。<br>
 ※ ホーム・ページ <a href="http://esperanto.mond.jp/index.html#espvortaroj">(Verda Monteto)</a><br>
-(2018-2-15)<br>
+(2018-2-16)<br>
 </body>
 </html>
