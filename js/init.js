@@ -12,7 +12,7 @@ notice appear in supporting documentation.
 This file is provided "as is" without express or implied warranty.
 */
 
-var version="v3.0 (2018-01-13)";
+var version="v1.0 (2018-02-18)";
 var available_langs= ["eo","en","ja"];
 var lang_file= null;	//"lang_XX.js";
 

@@ -239,7 +239,7 @@ function makeSelDictsDialog() {
 	//app version
 	var elem=document.createElement("div");
 	elem.className="titlebar";
-	elem.appendChild(document.createTextNode("Vortaroj "+version));
+	elem.appendChild(document.createTextNode("Vorto "+version));
 	frag.appendChild(elem);
 
 	//head
