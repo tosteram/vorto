@@ -4,7 +4,7 @@ Date	2018-01-13
 Author	T.Teramoto
 Compile: nim c -d:release -p:%NimMylib% vortoserver
      or  nim c -d:release -p:~/progs/nim vortoserver
-	     nim c -d:release --deadCodeElim:off vortoserver
+	     nim c -d:release -p:~/progs/nim --deadCodeElim:off vortoserver
         (compiler bug?: --deadCodeElim:off, to load 'sqlite3.so' lib
         ( in 'release' mode on Linux Ubuntue
         ( you have to 'export LD_LIBRARY_PATH=/path/to/lib'
