@@ -137,18 +137,22 @@ proc get_req(req: Request) {.async.} =
 
   of "/close-db":
     # TODO
-    discard
+    await req.respond(Http400, "rejected")
 
   of "/reopen-db":
     # TODO
-    discard
+    await req.respond(Http400, "rejected")
 
   #=== Etc ===
 
   of "/quit":
-    await req.respond(Http200, "quit")
-    await sleepAsync(1000);
-    quit_polling= true
+    if req.hostname=="127.0.0.1" or req.hostname=="localhost":
+      await req.respond(Http200, "quit")
+      await sleepAsync(1000);
+      quit_polling= true
+    else:
+      echo "/quit rejected"
+      await req.respond(Http400, "rejected")
 
   of "/host-os":
     echo hostOS # windows, macosx, linux
@@ -335,7 +339,12 @@ proc post_req(req: Request) {.async.} =
   # search_props?range=..&match=..&offset=..&sort=(lang)
   # search?word=..&dictd=..
   # ...
+  echo "POST ", req.url.path
   echo req.body
+
+  if not req.body.startsWith("/search"):
+    await req.respond(Http400, "rejected")
+    return
 
   var props: TableRef[string,string]      #name: range,match,offset,sort
   var where= newTable[string,seq[string]]() #word, [dictid,...]
