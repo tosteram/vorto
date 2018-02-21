@@ -4,10 +4,12 @@ test/
 not_used/
 *~
 .DS_Store
+log*.txt
 
 # executables
 vortoserver
 client
+logger
 make_vortaroj/jsontodb
 make_vortaroj/read_pejv
 

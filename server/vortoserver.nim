@@ -3,8 +3,8 @@ File	vortoserver.nim
 Date	2018-01-13
 Author	T.Teramoto
 Compile: nim c -d:release -p:%NimMylib% vortoserver
-     or  nim c -d:release -p:~/progs/nim vortoserver
-	     nim c -d:release -p:~/progs/nim --deadCodeElim:off vortoserver
+     or  nim c -d:release -p:~/progs/nim --threads:on vortoserver
+	     nim c -d:release -p:~/progs/nim --threads:on --deadCodeElim:off vortoserver
         (compiler bug?: --deadCodeElim:off, to load 'sqlite3.so' lib
         ( in 'release' mode on Linux Ubuntue
         ( you have to 'export LD_LIBRARY_PATH=/path/to/lib'
@@ -19,6 +19,7 @@ from nativesockets import `$`, Port
 
 import mylib/inifile, mylib/sqlite3, mylib/collate
 import utils, httphelper #, templates
+import logger
 
 
 #======================================
@@ -32,8 +33,8 @@ var
   quit_polling {.threadvar.}: bool #= false
   ini {.threadvar.}: TableRef[string,string]
   #dict_db {.threadvar.}: DbConn
+  lg {.threadvar.}: Logger
 
-quit_polling= false
 
 
 #======================================
@@ -71,7 +72,7 @@ proc url_to_utf8(s:string): string =
 proc open_vortaroj(): DbConn =
   result= openDb(VortoDB)
   let ret= collation_utf8_esperanto_ci(result)
-  echo "collation=", $ret
+  lg.log "*collation=" & $ret
 
 #proc close_vortaroj(db:DbConn) =
 #  closeDb(db)
@@ -85,7 +86,9 @@ proc open_vortaroj(): DbConn =
 #
 proc get_req(req: Request) {.async.} =
 
-  echo "GET ", req.url.path #debug
+  let msg= req.hostname & "," & "GET " & req.url.path
+  lg.log "*" & msg  #debug
+  lg.log msg
   
   case req.url.path
   of "/":
@@ -114,7 +117,7 @@ proc get_req(req: Request) {.async.} =
     ret[ret.high]= '}'  # replace ','
     db.closeDb()
 
-    echo ret  #debug
+    #echo ret  #debug
     await req.respond(Http200, ret)
 
   of "/search":
@@ -132,7 +135,7 @@ proc get_req(req: Request) {.async.} =
            else:
              "[]"
     db.closeDb()
-    echo ret  #debug
+    #echo ret  #debug
     await req.respond(Http200, ret)
 
   of "/close-db":
@@ -155,7 +158,7 @@ proc get_req(req: Request) {.async.} =
       await req.respond(Http400, "rejected")
 
   of "/host-os":
-    echo hostOS # windows, macosx, linux
+    #lg.log "*" & hostOS # windows, macosx, linux
     await req.respond(Http200, hostOS)
 
   #=== Send back Files ====
@@ -164,6 +167,9 @@ proc get_req(req: Request) {.async.} =
     # Get the filename
     var filename= req.url.path.substr(1)  # remove '/'
     filename= url_to_utf8(filename) # '%hh' -> hex
+
+    # TODO SECURITY HOLE!
+    # reject filename containing ".."
 
     # Read/Send the file
     if fileExists(filename):
@@ -179,7 +185,7 @@ proc get_req(req: Request) {.async.} =
       #echo $req_headers  #debug
       let imss= req_headers.getOrDefault("if-modified-since")
                     # [weekday, day-month-year-zone]
-      echo "  ims=", $imss, " file time=", file_time_str
+      lg.log "*  ims=" & $imss & " file time=" & file_time_str
       if imss!=nil:
         # Once accessed
         let ims= imss[1]
@@ -187,16 +193,16 @@ proc get_req(req: Request) {.async.} =
         let time_info= ims.parse("d MMM yyyy hh:mm:ss 'GMT'")
         if time_info.toTime == file_time:
           # not modified
-          echo "  not modified"
+          lg.log "*  not modified"
           status= Http304 #"304 Not Modified"
           content= ""
         else:
           # modified
-          echo "  modified"
+          lg.log "*  modified"
           content= readFile(filename)
       else:
         # The first time, Newly accessed
-        echo "  reading"
+        lg.log "*  reading"
         content= readFile(filename)
 
       let headers= newHttpHeaders([
@@ -206,8 +212,8 @@ proc get_req(req: Request) {.async.} =
       await req.respond(status, content, headers)
 
     else:
-      echo "  NOT FOUND: ", filename
-      await req.respond(Http404, "Error 404: Page not found.")
+      lg.log "*  NOT FOUND: " & filename
+      await req.respond(Http404, "Error 404: Page/File not found.")
 
 #
 # Post request
@@ -339,8 +345,8 @@ proc post_req(req: Request) {.async.} =
   # search_props?range=..&match=..&offset=..&sort=(lang)
   # search?word=..&dictd=..
   # ...
-  echo "POST ", req.url.path
-  echo req.body
+  lg.log "*" & req.body
+  lg.log req.hostname & "," & "POST " & req.url.path
 
   if not req.body.startsWith("/search"):
     await req.respond(Http400, "rejected")
@@ -371,11 +377,19 @@ proc post_req(req: Request) {.async.} =
   #debug
   #echo $props
   #echo $where
+  var msg= "SEARCH," & props["range"] & "," & props["match"] & ","
+  for wd,ids in where:
+    msg &= wd & ":"
+    for id in ids:
+      msg &= $id & " "
+    msg[msg.high]= ','
+  msg.setLen(msg.len-1) #remove the last ','
+  lg.log msg
 
   # check the limit : offet and count
   let offset= props.getOr("offset", "0").parseInt
   let limit = props.getOr("limit", "0").parseInt
-  echo "offset=$# limit=$#" % [$offset, $limit]  #debug
+  lg.log "*offset=$# limit=$#" % [$offset, $limit]  #debug
 
   if props["range"]=="entries":
     # return JSON: [[dict_shortname, word_id, word,entry_word,def], ...]
@@ -391,7 +405,7 @@ proc post_req(req: Request) {.async.} =
                 makeClause_word(where, props["match"]) &
                 ") and word.dictid=dict.id and word.defid=def.id" & orderby &
                 " limit " & $limit & " offset " & $offset
-    echo "SQL= ", sqlstr #debug
+    lg.log "*SQL= " & sqlstr #debug
 
     var ret= "["
     for row in db.fetch_rows(sqlstr):
@@ -403,7 +417,7 @@ proc post_req(req: Request) {.async.} =
       ret &= "]"          # empty
     else:
       ret[ret.high]= ']'  # replace ','
-    echo "RET= ", ret #debug
+    #echo "RET= ", ret #debug
 
     db.closeDb()
 
@@ -424,7 +438,7 @@ proc post_req(req: Request) {.async.} =
                 makeClause_text(where, props["match"]) &
                 ") and def.dictid=dict.id and def.id=word.defid" & orderby &
                 " limit " & $limit & " offset " & $offset
-    echo "SQL= ", sqlstr #debug
+    lg.log "*SQL= " & sqlstr #debug
 
     var ret= "["
     for row in db.fetch_rows(sqlstr):
@@ -436,7 +450,7 @@ proc post_req(req: Request) {.async.} =
       ret &= "]"          # empty
     else:
       ret[ret.high]= ']'  # replace ','
-    echo "RET= ", ret #debug
+    #echo "RET= ", ret #debug
 
     db.closeDb()
 
@@ -455,7 +469,7 @@ proc post_req(req: Request) {.async.} =
                 makeClause_root(where, props["match"]) &
                 ") and word.dictid=dict.id and word.defid=def.id" & orderby &
                 " limit " & $limit & " offset " & $offset
-    echo "SQL= ", sqlstr #debug
+    lg.log "*SQL= " & sqlstr #debug
 
     var ret= "["
     for row in db.fetch_rows(sqlstr):
@@ -467,7 +481,7 @@ proc post_req(req: Request) {.async.} =
       ret &= "]"          # empty
     else:
       ret[ret.high]= ']'  # replace ','
-    echo "RET= ", ret #debug
+    #echo "RET= ", ret #debug
 
     db.closeDb()
 
@@ -487,7 +501,7 @@ proc routes(req: Request) {.async.} =
     of HttpPost:
       discard post_req(req)
     else:
-      discard
+      await req.respond(Http405, "That method not allowed")
 
 #======================================
 # MAIN
@@ -517,6 +531,8 @@ ini= inifile.read(IniFile)
 var port= Port(ini["port"].parseInt)
 var start_url= ini["start_url"]
 
+lg= newLogger()
+
 try:
   # Start the HTTP Server
   var server= newAsyncHttpServer()
@@ -533,6 +549,7 @@ try:
     openDefaultBrowser("http://localhost:" & $port & start_url)
 
   # Loop and finish
+  quit_polling= false
   while not (serveFut.finished or quit_polling):
     poll()
 
@@ -543,6 +560,8 @@ except:
   echo getCurrentExceptionMsg()
 
 # post-process
+lg.log "QUIT"
+closeLogger lg
 
 echo "[QUIT]"
 
