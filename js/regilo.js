@@ -426,7 +426,7 @@ function postSchCommand(schrec) {
 		body += "\n" + url;
 	}
 
-	ajaxPost("/", body, "text/plain", showResults, schrec);
+	ajaxPost("/search", body, "text/plain", showResults, schrec);
 }
 
 function showResults(data, schrec) {

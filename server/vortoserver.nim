@@ -135,7 +135,9 @@ proc get_req(req: Request) {.async.} =
            else:
              "[]"
     db.closeDb()
+
     #echo ret  #debug
+    lg.log req.hostname & ",SCH," & q["word"] & ":" & q["dictid"]
     await req.respond(Http200, ret)
 
   of "/close-db":
@@ -168,8 +170,11 @@ proc get_req(req: Request) {.async.} =
     var filename= req.url.path.substr(1)  # remove '/'
     filename= url_to_utf8(filename) # '%hh' -> hex
 
-    # TODO SECURITY HOLE!
     # reject filename containing ".."
+    if filename.contains(".."):
+      lg.log "*  PATH ERROR"
+      await req.respond(Http404, "Error 404: File not found.")
+      return
 
     # Read/Send the file
     if fileExists(filename):
@@ -346,9 +351,9 @@ proc post_req(req: Request) {.async.} =
   # search?word=..&dictd=..
   # ...
   lg.log "*" & req.body
-  lg.log req.hostname & "," & "POST " & req.url.path
 
-  if not req.body.startsWith("/search"):
+  if req.url.path != "/search":
+    lg.log req.hostname & "," & "POST " & req.url.path & " - bad path"
     await req.respond(Http400, "rejected")
     return
 
@@ -374,10 +379,14 @@ proc post_req(req: Request) {.async.} =
         where[word]= @[dict]
   #end for
 
+  if not(props.hasKey("range") and props.hasKey("match") and where.len>0):
+    await req.respond(Http200, "[]")
+    return
+
   #debug
   #echo $props
   #echo $where
-  var msg= "SEARCH," & props["range"] & "," & props["match"] & ","
+  var msg= req.hostname & ",SEARCH," & props["range"] & "," & props["match"] & ","
   for wd,ids in where:
     msg &= wd & ":"
     for id in ids:
@@ -488,7 +497,8 @@ proc post_req(req: Request) {.async.} =
     await req.respond(Http200, ret)
 
   else:
-    discard
+    # range error
+    await req.respond(Http200, "[]")
 
 #
 # ROUTES
