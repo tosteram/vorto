@@ -12,11 +12,12 @@ type
   #StrChannel = ptr Channel[string]
   Logger* = ref object
     #chan: StrChannel
+    basename: string
     file: File
     curYear: int
     curMonth: Month
 
-const BaseFile= "log$1.txt"
+#const BaseFile= "log$1.txt"
 const ExitCmd= "!EXIT!"
 
 # global
@@ -59,23 +60,23 @@ proc log* (lg:Logger, msg:string) =
     if gmt.month!=lg.curMonth or gmt.year!=lg.curYear:
       # new log file
       lg.file.close
-      let filename= BaseFile % gmt.format("yyyyMM")
+      let filename= lg.basename % gmt.format("yyyyMM")
       lg.file= open(filename, fmAppend)
     let f= lg.file
     f.writeLine(gmt.format("yyyy-MM-dd hh:mm:ss"), ",", msg)
     f.flushFile
 
-proc newLogger* (): Logger =
+proc newLogger* (basename:string): Logger =
   #var chan: StrChannel
   #open(chan)
   let gmt= getTime().getGMTime
-  let filename= BaseFile % gmt.format("yyyyMM")
+  let filename= basename % gmt.format("yyyyMM")
   let f= open(filename, fmAppend)
   #result= Logger(chan: chan.addr, file: f, curYear: gmt.year, curMonth: gmt.month)
   #                     +-- chan is on the stack, so not available outside!
   #result= Logger(chan: chan, file: f, curYear: gmt.year, curMonth: gmt.month)
   #               +-- chan is copied
-  result= Logger(file: f, curYear: gmt.year, curMonth: gmt.month)
+  result= Logger(basename:basename, file: f, curYear: gmt.year, curMonth: gmt.month)
   #spawn log_loop(result.addr)
 
 proc closeLogger* (logger:Logger) =
@@ -87,7 +88,7 @@ proc closeLogger* (logger:Logger) =
 
 when isMainModule:
 
-  var lg= newLogger()
+  var lg= newLogger("log$1.txt")
   while true:
     let ln= stdin.readLine()
     if ln=="exit":

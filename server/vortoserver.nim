@@ -517,34 +517,20 @@ proc routes(req: Request) {.async.} =
 # MAIN
 #======================================
 
-# Set the Current Dir
-when hostOS=="macosx":
-  discard # FOR TEST
-  # current dir is '/'
-#  const MacApp="mannyou.app"
-#  let 
-#    appfile= getAppFilename()
-#    p= appfile.find(MacApp)
-#    appdir= appfile.substr(0, p-1)
-#  setCurrentDir(appdir)
-else:
-  # windows, (linux)
-  let
-    appfile= getAppFilename()
-    (appdir, _)= splitPath(appfile)
-  if getCurrentDir()!=appdir:
-    setCurrentDir(appdir)
+let (appdir, _)= getAppFilename().splitPath # vortoserver in 'server' dir
+ini= inifile.read(appdir / IniFile)
+
+let cur_dir= ini["cur_dir"]
+if getCurrentDir()!=cur_dir:
+  setCurrentDir(cur_dir)
 
 echo "cur.dir= ", getCurrentDir()
 
-ini= inifile.read(IniFile)
-var port= Port(ini["port"].parseInt)
-var start_url= ini["start_url"]
-
-lg= newLogger()
+lg= newLogger(ini["log_file"])
 
 try:
   # Start the HTTP Server
+  let port= Port(ini["port"].parseInt)
   var server= newAsyncHttpServer()
   let serveFut= server.serve(port, routes)
   echo "Server starts, listening on port ", port
@@ -556,7 +542,7 @@ try:
   if hostOS=="linux" or os.paramCount()>0 and os.paramStr(1)=="-n":
     discard
   else:
-    openDefaultBrowser("http://localhost:" & $port & start_url)
+    openDefaultBrowser("http://localhost:" & $port & ini["start_url"])
 
   # Loop and finish
   quit_polling= false
