@@ -520,10 +520,7 @@ proc routes(req: Request) {.async.} =
 let (appdir, _)= getAppFilename().splitPath # vortoserver in 'server' dir
 ini= inifile.read(appdir / IniFile)
 
-let cur_dir= ini["cur_dir"]
-if getCurrentDir()!=cur_dir:
-  setCurrentDir(cur_dir)
-
+setCurrentDir(appdir / ini["cur_dir"])
 echo "cur.dir= ", getCurrentDir()
 
 lg= newLogger(ini["log_file"])
@@ -557,8 +554,7 @@ except:
 
 # post-process
 lg.log "QUIT"
+lg.log "*[QUIT]"
 closeLogger lg
-
-echo "[QUIT]"
 
 # vim: ts=2 sw=2 et
