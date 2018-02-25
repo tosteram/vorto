@@ -362,6 +362,7 @@ proc post_req(req: Request) {.async.} =
 
   var dict_count= 0
   for ln in req.body.splitLines:
+    if ln.len==0: continue
     let
       cmd_qstr= ln.split('?')
       cmd= cmd_qstr[0]
@@ -371,12 +372,15 @@ proc post_req(req: Request) {.async.} =
       inc dict_count
       let
         w_d= cmd_qstr[1].query_pairs
-        word= w_d["word"]
-        dict= w_d["dictid"]
+        word= w_d.getOrDefault("word")
+        dict= w_d.getOrDefault("dictid")
+      if word.isNilOrEmpty or dict.isNilOrEmpty:
+        continue
       if where.hasKey(word):
         where[word].add dict
       else:
         where[word]= @[dict]
+    #else: discard
   #end for
 
   if not(props.hasKey("range") and props.hasKey("match") and where.len>0):
