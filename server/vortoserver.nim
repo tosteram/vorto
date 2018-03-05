@@ -123,15 +123,19 @@ proc get_req(req: Request) {.async.} =
   of "/search":
     # query : /search?dictid=xx&word=xxx
     # return: [dict_shortname, word_id, word, entry_word, def]
+    let q= get_query(req)
+    if not (q.hasKey("word") and q.hasKey("dictid")):
+      await req.respond(Http200, "[]")
+      return
+
     let
       db= open_vortaroj()
-      q= get_query(req)
       sqlstr= "select shortname,word.id,word,entry,defs from word,def,dict where word=? and word.dictid=? and def.id=word.defid and dict.id=word.dictid"
       row= db.fetch_one(sqlstr, q["word"].dbText, q["dictid"].parseInt.dbInt)
       ret= if row.len==5:
              """["$#", $#, "$#", "$#", "$#"]""" %
-             [row[0].textVal, $row[1].intVal, row[2].textVal, row[3].textVal,
-             row[4].textVal]
+              [row[0].textVal, $row[1].intVal, row[2].textVal, row[3].textVal,
+              row[4].textVal]
            else:
              "[]"
     db.closeDb()
@@ -171,7 +175,7 @@ proc get_req(req: Request) {.async.} =
     filename= url_to_utf8(filename) # '%hh' -> hex
 
     # reject filename containing ".."
-    if filename.contains(".."):
+    if filename[0]=='.' or filename.contains(".."):
       lg.log "*  PATH ERROR"
       await req.respond(Http404, "Error 404: File not found.")
       return
@@ -182,7 +186,7 @@ proc get_req(req: Request) {.async.} =
       let
         mimetype= getMimeType(filename)
         file_time= filename.getLastModificationTime
-        file_time_str= file_time.getGMTime.format("ddd, d MMM yyyy hh:mm:ss 'GMT'")
+        file_time_str= file_time.utc.format("ddd, d MMM yyyy hh:mm:ss 'GMT'")
       var
         status= Http200
         content: string

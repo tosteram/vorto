@@ -1,6 +1,7 @@
 #[
 File  logger.nim
 Date  2018-2-20
+  2018-3-5 getGMTime -> utc
 Copyright 2018 T.Teramoto
 Licence MIT
 ]#
@@ -34,7 +35,7 @@ proc log_loop(logger: ptr Logger) =
     if msg.len>0 and msg[0]=='*':
       echo msg
     else:
-      let gmt= getTime().getGMTime
+      let gmt= getTime().utc
       if gmt.month!=logger[].curMonth or gmt.year!=logger[].curYear:
         # new log file
         logger[].file.close
@@ -56,7 +57,7 @@ proc log* (lg:Logger, msg:string) =
   if msg.len>0 and msg[0]=='*':
     echo msg
   else:
-    let gmt= getTime().getGMTime
+    let gmt= getTime().utc
     if gmt.month!=lg.curMonth or gmt.year!=lg.curYear:
       # new log file
       lg.file.close
@@ -69,7 +70,7 @@ proc log* (lg:Logger, msg:string) =
 proc newLogger* (basename:string): Logger =
   #var chan: StrChannel
   #open(chan)
-  let gmt= getTime().getGMTime
+  let gmt= getTime().utc
   let filename= basename % gmt.format("yyyyMM")
   let f= open(filename, fmAppend)
   #result= Logger(chan: chan.addr, file: f, curYear: gmt.year, curMonth: gmt.month)

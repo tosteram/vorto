@@ -1,6 +1,7 @@
 #[
 File  utils.nim
 Date  2017-06-24
+  2018-3-5 getGMTime -> utc
 
 Export:
   has,
@@ -42,7 +43,7 @@ proc getMimeType* (filename: string): string =
 
 # -> string
 proc get_GMT*(): string =
-  getTime().getGMTime.format("yyyy-MM-dd HH:mm:ss")
+  getTime().utc.format("yyyy-MM-dd HH:mm:ss")
 
 
 #-- from mylib/utils.nim
