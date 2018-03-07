@@ -27,13 +27,14 @@ import logger
 #======================================
 const
   StartPage= "vorto.html"  # start HTML
-  VortoDB = "vortaroj/vortaroj.db" # database
+  VortoDB = "server/vortaroj/vortaroj.db" # database
   IniFile  = "vorto.ini"
 var
   quit_polling {.threadvar.}: bool #= false
   ini {.threadvar.}: TableRef[string,string]
   #dict_db {.threadvar.}: DbConn
   lg {.threadvar.}: Logger
+  WebHome {.threadvar.}: string
 
 
 
@@ -93,7 +94,7 @@ proc get_req(req: Request) {.async.} =
   case req.url.path
   of "/":
     #--- Return 'StartPage'.html
-    let html= readFile(StartPage)
+    let html= readFile(WebHome / StartPage)
     let headers= newHttpHeaders([("content-type", "text/html")])
     await req.respond(Http200, html, headers)
 
@@ -179,6 +180,9 @@ proc get_req(req: Request) {.async.} =
       lg.log "*  PATH ERROR"
       await req.respond(Http404, "Error 404: File not found.")
       return
+
+    # set filename under the WebHome
+    filename= WebHome / filename
 
     # Read/Send the file
     if fileExists(filename):
@@ -530,6 +534,7 @@ ini= inifile.read(appdir / IniFile)
 
 setCurrentDir(appdir / ini["cur_dir"])
 echo "cur.dir= ", getCurrentDir()
+WebHome= ini["web_home"]
 
 lg= newLogger(ini["log_file"])
 
