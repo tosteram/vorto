@@ -2,6 +2,7 @@
 nimcache/
 test/
 not_used/
+web/foliaro/
 *~
 .DS_Store
 log*.txt
