@@ -7,28 +7,25 @@ Licence MIT
 ]#
 
 import strutils, times
-#import threadpool
+import threadpool
 
 type
-  #StrChannel = ptr Channel[string]
+  StrChannel = Channel[string]
   Logger* = ref object
-    #chan: StrChannel
+    chan: ref StrChannel
     basename: string
     file: File
     curYear: int
     curMonth: Month
 
-#const BaseFile= "log$1.txt"
 const ExitCmd= "!EXIT!"
 
-# global
-#var chan : StrChannel
-#[
-proc log_loop(logger: ptr Logger) =
-  echo "LOGGER started"
+
+proc log_thread(chan:ptr StrChannel, logger:Logger) =
+  echo "LOGGER starts"
 
   while true:
-    let msg= logger[].chan.recv
+    let msg= chan[].recv
     if msg==ExitCmd:
       break
 
@@ -36,19 +33,22 @@ proc log_loop(logger: ptr Logger) =
       echo msg
     else:
       let gmt= getTime().utc
-      if gmt.month!=logger[].curMonth or gmt.year!=logger[].curYear:
+      if gmt.month!=logger.curMonth or gmt.year!=logger.curYear:
         # new log file
-        logger[].file.close
-        let filename= BaseFile % gmt.format("yyyyMM")
-        logger[].file= open(filename, fmAppend)
-      let f= logger[].file
+        logger.file.close
+        let filename= logger.basename % gmt.format("yyyyMM")
+        logger.file= open(filename, fmAppend)
+        logger.curMonth= gmt.month
+        logger.curYear = gmt.year
+      let f= logger.file
       f.writeLine(gmt.format("yyyy-MM-dd hh:mm:ss"), ",", msg)
       f.flushFile
   #end while
 
-  echo "EXIT logger"
-]#
+  logger.file.close
+  echo "LOGGER stops"
 
+#[
 proc log* (lg:Logger, msg:string) =
   #lg.chan.send(msg)
   if msg==ExitCmd:
@@ -63,28 +63,31 @@ proc log* (lg:Logger, msg:string) =
       lg.file.close
       let filename= lg.basename % gmt.format("yyyyMM")
       lg.file= open(filename, fmAppend)
+      lg.curMonth= gmt.month
+      lg.curYear = gmt.year
     let f= lg.file
     f.writeLine(gmt.format("yyyy-MM-dd hh:mm:ss"), ",", msg)
     f.flushFile
+]#
+proc log* (lg:Logger, msg:string) =
+  lg.chan[].send msg
 
 proc newLogger* (basename:string): Logger =
-  #var chan: StrChannel
-  #open(chan)
+  var chan= new(StrChannel)
+  open(chan[])
   let gmt= getTime().utc
   let filename= basename % gmt.format("yyyyMM")
   let f= open(filename, fmAppend)
-  #result= Logger(chan: chan.addr, file: f, curYear: gmt.year, curMonth: gmt.month)
-  #                     +-- chan is on the stack, so not available outside!
-  #result= Logger(chan: chan, file: f, curYear: gmt.year, curMonth: gmt.month)
-  #               +-- chan is copied
-  result= Logger(basename:basename, file: f, curYear: gmt.year, curMonth: gmt.month)
-  #spawn log_loop(result.addr)
+  result= Logger(chan: chan,
+                file: f,
+                curYear: gmt.year, curMonth: gmt.month)
+  spawn log_thread(chan[].addr, result)
 
 proc closeLogger* (logger:Logger) =
-  #logger.chan.send(ExitCmd)
-  #sync()
-  #close(logger.chan)
-  logger.file.close
+  logger.chan[].send(ExitCmd)
+  sync()
+  close(logger.chan[])
+  #logger.file.close
 
 
 when isMainModule:
