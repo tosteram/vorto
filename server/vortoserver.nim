@@ -4,8 +4,8 @@ Date	2018-01-13
 Author	T.Teramoto
 Compile: nim c -d:release -p:%NimMylib% vortoserver
      or  nim c -d:release -p:~/progs/nim --threads:on vortoserver
-	     nim c -d:release -p:~/progs/nim --threads:on --deadCodeElim:off vortoserver
-        (compiler bug?: --deadCodeElim:off, to load 'sqlite3.so' lib
+	     nim c -d:release -p:~/progs/nim --threads:on vortoserver
+        (compiler bug?: --deadCodeElim:off, to load 'sqlite3.so' lib)
         ( in 'release' mode on Linux Ubuntue
         ( you have to 'export LD_LIBRARY_PATH=/path/to/lib'
         (Ref. https://forum.nim-lang.org/t/2475/1
@@ -16,6 +16,7 @@ Compile: nim c -d:release -p:%NimMylib% vortoserver
 import strutils, tables, os, times, browsers, json
 import asyncdispatch, asynchttpserver
 from nativesockets import `$`, Port
+import osproc
 
 import mylib/inifile, mylib/sqlite3, mylib/collate
 import utils, httphelper #, templates
@@ -26,15 +27,17 @@ import logger
 # Constants / Module vars
 #======================================
 const
-  StartPage= "vorto.html"  # start HTML
+  RootPage= "index.html"  # start HTML
   VortoDB = "server/vortaroj/vortaroj.db" # database
   IniFile  = "vorto.ini"
+  ErrorPage404= "The file can be found in the room No. 404."
 var
   quit_polling {.threadvar.}: bool #= false
   ini {.threadvar.}: TableRef[string,string]
   #dict_db {.threadvar.}: DbConn
   lg {.threadvar.}: Logger
   WebHome {.threadvar.}: string
+  VortoHome {.threadvar.}: string
 
 
 
@@ -79,113 +82,7 @@ proc open_vortaroj(): DbConn =
 #  closeDb(db)
 
 
-#======================================
-# Routes
-#======================================
-#
-# GET request
-#
-proc get_req(req: Request) {.async.} =
-
-  let msg= req.hostname & "," & "GET " & req.url.path
-  lg.log "*" & msg  #debug
-  lg.log msg
-  
-  case req.url.path
-  of "/":
-    #--- Return 'StartPage'.html
-    let html= readFile(WebHome / StartPage)
-    let headers= newHttpHeaders([("content-type", "text/html")])
-    await req.respond(Http200, html, headers)
-
-  #=== Dict Table ===
-
-  of "/get_all_dicts":
-    #--- [query]
-    #    Return JSON {shortname:{id:..,name:..,version:..,author:..,langs:..,...},...}
-    let
-      db= open_vortaroj()
-      sqlstr= "select id,shortname,name,version,author,langs,format,color,conv1,conv2,makeentry,makedef,schonline,url,remark from dict, disporder where dict.id=dictid and disp>0 order by disp"
-    var ret= "{"
-    for row in db.fetch_rows(sqlstr):
-      let r= """"$#":{"dictid":$#,"name":"$#","version":"$#","author":"$#","langs":"$#","format":"$#","color":"$#","conv1":"$#","conv2":"$#","makeentry":"$#","makedef":"$#","schonline":"$#","url":"$#","remark":"$#"},""" %
-          [row[1].textVal, $row[0].intVal, row[2].textVal, row[3].textVal,
-          row[4].textVal, row[5].textVal, row[6].textVal, row[7].textVal,
-          row[8].textVal, row[9].textVal, row[10].textVal, row[11].textVal,
-          row[12].textVal, row[13].textVal, row[14].textVal]
-      ret &= r
-    #end while
-    ret[ret.high]= '}'  # replace ','
-    db.closeDb()
-
-    #echo ret  #debug
-    await req.respond(Http200, ret)
-
-  of "/search":
-    # query : /search?dictid=xx&word=xxx
-    # return: [dict_shortname, word_id, word, entry_word, def]
-    let q= get_query(req)
-    if not (q.hasKey("word") and q.hasKey("dictid")):
-      await req.respond(Http200, "[]")
-      return
-
-    let
-      db= open_vortaroj()
-      sqlstr= "select shortname,word.id,word,entry,defs from word,def,dict where word=? and word.dictid=? and def.id=word.defid and dict.id=word.dictid"
-      row= db.fetch_one(sqlstr, q["word"].dbText, q["dictid"].parseInt.dbInt)
-      ret= if row.len==5:
-             """["$#", $#, "$#", "$#", "$#"]""" %
-              [row[0].textVal, $row[1].intVal, row[2].textVal, row[3].textVal,
-              row[4].textVal]
-           else:
-             "[]"
-    db.closeDb()
-
-    #echo ret  #debug
-    lg.log req.hostname & ",SCH," & q["word"] & ":" & q["dictid"]
-    await req.respond(Http200, ret)
-
-  of "/close-db":
-    # TODO
-    await req.respond(Http400, "rejected")
-
-  of "/reopen-db":
-    # TODO
-    await req.respond(Http400, "rejected")
-
-  #=== Etc ===
-
-  of "/quit":
-    if req.hostname=="127.0.0.1" or req.hostname=="localhost":
-      await req.respond(Http200, "quit")
-      await sleepAsync(1000);
-      quit_polling= true
-    else:
-      echo "/quit rejected"
-      await req.respond(Http400, "rejected")
-
-  of "/host-os":
-    #lg.log "*" & hostOS # windows, macosx, linux
-    await req.respond(Http200, hostOS)
-
-  #=== Send back Files ====
-  
-  else:
-    # Get the filename
-    var filename= req.url.path.substr(1)  # remove '/'
-    filename= url_to_utf8(filename) # '%hh' -> hex
-
-    # reject filename containing ".."
-    if filename[0]=='.' or filename.contains(".."):
-      lg.log "*  PATH ERROR"
-      await req.respond(Http404, "Error 404: File not found.")
-      return
-
-    # set filename under the WebHome
-    filename= WebHome / filename
-
-    # Read/Send the file
-    if fileExists(filename):
+proc sendFile(req:Request, filename:string) {.async.} =
       #echo "GET ", filename
       let
         mimetype= getMimeType(filename)
@@ -224,9 +121,159 @@ proc get_req(req: Request) {.async.} =
             ])
       await req.respond(status, content, headers)
 
+
+proc callCgi(req:Request, filename:string) {.async.} =
+  let p= startProcess(filename, options={})
+  var inF, outF: File
+  discard open(inF, p.outputHandle, fmRead)   # handle to File
+  discard open(outF, p.inputHandle, fmWrite)  # "
+
+  let line= "GET " & req.url.path & "?" & req.url.query & " HTTP/1.0"
+  outF.writeLine line
+  outF.flushFile  # IMPORTANT! Needed
+  let resp= inF.readAll # headers + empty_line + body
+  discard p.waitForExit
+  p.close
+
+  let pos= resp.find("\r\n\r\n")
+  if pos>=0:
+    let body= resp.substr(pos+4)
+    # TODO temporary
+    #let headerBlock= resp[0..<pos]
+    let headers= newHttpHeaders([("content-type", "text/html")])
+    await req.respond(Http200, body, headers)
+  else:
+    await req.respond(Http500, "CGI Process Error")
+
+
+#======================================
+# Routes
+#======================================
+#
+# GET request
+#
+proc get_req(req: Request) {.async.} =
+
+  let msg= req.hostname & "," & "GET " & req.url.path
+  lg.log "*" & msg  #debug
+  lg.log msg
+  
+  case req.url.path
+  of "/":
+    #--- Return /index.html
+    let html= readFile(WebHome / RootPage)
+    let headers= newHttpHeaders([("content-type", "text/html")])
+    await req.respond(Http200, html, headers)
+
+  #=== Dict Table ===
+
+  of "/vorto/get_all_dicts":
+    #--- [query]
+    #    Return JSON {shortname:{id:..,name:..,version:..,author:..,langs:..,...},...}
+    let
+      db= open_vortaroj()
+      sqlstr= "select id,shortname,name,version,author,langs,format,color,conv1,conv2,makeentry,makedef,schonline,url,remark from dict, disporder where dict.id=dictid and disp>0 order by disp"
+    var ret= "{"
+    for row in db.fetch_rows(sqlstr):
+      let r= """"$#":{"dictid":$#,"name":"$#","version":"$#","author":"$#","langs":"$#","format":"$#","color":"$#","conv1":"$#","conv2":"$#","makeentry":"$#","makedef":"$#","schonline":"$#","url":"$#","remark":"$#"},""" %
+          [row[1].textVal, $row[0].intVal, row[2].textVal, row[3].textVal,
+          row[4].textVal, row[5].textVal, row[6].textVal, row[7].textVal,
+          row[8].textVal, row[9].textVal, row[10].textVal, row[11].textVal,
+          row[12].textVal, row[13].textVal, row[14].textVal]
+      ret &= r
+    #end while
+    ret[ret.high]= '}'  # replace ','
+    db.closeDb()
+
+    #echo ret  #debug
+    await req.respond(Http200, ret)
+
+  of "/vorto/search":
+    # query : /search?dictid=xx&word=xxx
+    # return: [dict_shortname, word_id, word, entry_word, def]
+    let q= get_query(req)
+    if not (q.hasKey("word") and q.hasKey("dictid")):
+      await req.respond(Http200, "[]")
+      return
+
+    let
+      db= open_vortaroj()
+      sqlstr= "select shortname,word.id,word,entry,defs from word,def,dict where word=? and word.dictid=? and def.id=word.defid and dict.id=word.dictid"
+      row= db.fetch_one(sqlstr, q["word"].dbText, q["dictid"].parseInt.dbInt)
+      ret= if row.len==5:
+             """["$#", $#, "$#", "$#", "$#"]""" %
+              [row[0].textVal, $row[1].intVal, row[2].textVal, row[3].textVal,
+              row[4].textVal]
+           else:
+             "[]"
+    db.closeDb()
+
+    #echo ret  #debug
+    lg.log req.hostname & ",SCH," & q["word"] & ":" & q["dictid"]
+    await req.respond(Http200, ret)
+
+  of "/vorto/close-db":
+    # TODO
+    await req.respond(Http400, "rejected")
+
+  of "/vorto/reopen-db":
+    # TODO
+    await req.respond(Http400, "rejected")
+
+  #=== Directories ===
+
+  of "/vorto/", "/vorto/index.html":
+    let html= readFile(VortoHome / "vorto.html")
+    let headers= newHttpHeaders([("content-type", "text/html")])
+    await req.respond(Http200, html, headers)
+
+  of "/foliaro/":
+    let html= readFile(WebHome / "foliaro/index.html")
+    let headers= newHttpHeaders([("content-type", "text/html")])
+    await req.respond(Http200, html, headers)
+
+  #=== Etc ===
+
+  of "/quit":
+    if req.hostname=="127.0.0.1" or req.hostname=="localhost":
+      await req.respond(Http200, "quit")
+      await sleepAsync(1000);
+      quit_polling= true
+    else:
+      echo "/quit rejected"
+      await req.respond(Http400, "rejected")
+
+  of "/host-os":
+    #lg.log "*" & hostOS # windows, macosx, linux
+    await req.respond(Http200, hostOS)
+
+  #=== Send back Files / CGI ====
+
+  else:
+    # Get the filename
+    var filename= req.url.path.substr(1)  # remove '/'
+    filename= url_to_utf8(filename) # '%hh' -> hex
+
+    # reject filename containing ".."
+    if filename[0]=='.' or filename.contains(".."):
+      lg.log "*  PATH ERROR"
+      await req.respond(Http404, ErrorPage404)
+      return
+
+    # set filename under the WebHome
+    filename= WebHome / filename
+
+    # Read/Send the file
+    if fileExists(filename):
+      let (_, _, ext)= splitFile(filename)
+      if find([".pl", ".py"], ext) >= 0:
+        discard callCgi(req, filename)
+      else:
+        discard sendFile(req, filename)
+
     else:
       lg.log "*  NOT FOUND: " & filename
-      await req.respond(Http404, "Error 404: Page/File not found.")
+      await req.respond(Http404, ErrorPage404)
 
 #
 # Post request
@@ -360,7 +407,7 @@ proc post_req(req: Request) {.async.} =
   # ...
   lg.log "*" & req.body
 
-  if req.url.path != "/search":
+  if req.url.path != "/vorto/search":
     lg.log req.hostname & "," & "POST " & req.url.path & " - bad path"
     await req.respond(Http400, "rejected")
     return
@@ -535,6 +582,7 @@ ini= inifile.read(appdir / IniFile)
 setCurrentDir(appdir / ini["cur_dir"])
 echo "cur.dir= ", getCurrentDir()
 WebHome= ini["web_home"]
+VortoHome= ini["vorto_home"]
 
 lg= newLogger(ini["log_file"])
 

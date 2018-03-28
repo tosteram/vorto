@@ -189,7 +189,7 @@ function callback_lang() {
 	//			remark:..},
 	//		 ...
 	//		}
-	ajaxGet("/get_all_dicts", function(data) {
+	ajaxGet("get_all_dicts", function(data) {
 			Dictionaries= JSON.parse(data);
 			var idx= 0;	// TODO necessary?
 			for (var shortname in Dictionaries) {
@@ -426,7 +426,7 @@ function postSchCommand(schrec) {
 		body += "\n" + url;
 	}
 
-	ajaxPost("/search", body, "text/plain", showResults, schrec);
+	ajaxPost("search", body, "text/plain", showResults, schrec);
 }
 
 function showResults(data, schrec) {
@@ -1032,7 +1032,7 @@ function onDefClicked(evt) {
 			var vorto= target.href.substring(6); //"vorto:VORTO"; NB VORTO is URI-encoded!
 			// query : /search?dictid=xx&word=xxx
 			// return: [dict_shortname, word_id, word,entry_word,def]
-			var url= "/search?dictid="+D["dictid"]+"&word="+vorto.toLowerCase();
+			var url= "search?dictid="+D["dictid"]+"&word="+vorto.toLowerCase();
 			ajaxGet(url, function(data) {
 				var jsn= JSON.parse(data);
 				if (jsn.length>0) {
