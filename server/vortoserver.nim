@@ -128,7 +128,8 @@ proc callCgi(req:Request, filename:string) {.async.} =
   discard open(inF, p.outputHandle, fmRead)   # handle to File
   discard open(outF, p.inputHandle, fmWrite)  # "
 
-  let line= "GET " & req.url.path & "?" & req.url.query & " HTTP/1.0"
+  let querystr= url_to_utf8(req.url.query)
+  let line= "GET " & req.url.path & "?" & querystr & " HTTP/1.0"
   outF.writeLine line
   outF.flushFile  # IMPORTANT! Needed
   let resp= inF.readAll # headers + empty_line + body
@@ -229,6 +230,11 @@ proc get_req(req: Request) {.async.} =
 
   of "/foliaro/":
     let html= readFile(WebHome / "foliaro/index.html")
+    let headers= newHttpHeaders([("content-type", "text/html")])
+    await req.respond(Http200, html, headers)
+
+  of "/foliaro/ja/":
+    let html= readFile(WebHome / "foliaro/ja/index.html")
     let headers= newHttpHeaders([("content-type", "text/html")])
     await req.respond(Http200, html, headers)
 
