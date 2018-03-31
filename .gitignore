@@ -3,6 +3,7 @@ nimcache/
 test/
 not_used/
 web/foliaro/
+web/marinotes/
 *~
 .DS_Store
 log*.txt

@@ -31,14 +31,14 @@ const
   VortoDB = "server/vortaroj/vortaroj.db" # database
   IniFile  = "vorto.ini"
   ErrorPage404= "The file can be found in the room No. 404."
+type StrTable= TableRef[string,string]
 var
   quit_polling {.threadvar.}: bool #= false
-  ini {.threadvar.}: TableRef[string,string]
+  ini {.threadvar.}: StrTable
+  existingDirs {.threadvar.}: StrTable
   #dict_db {.threadvar.}: DbConn
   lg {.threadvar.}: Logger
   WebHome {.threadvar.}: string
-  VortoHome {.threadvar.}: string
-
 
 
 #======================================
@@ -57,6 +57,13 @@ proc get_ini_values(ini:TableRef[string,string], name: string): string =
   else:
     result= "\"" & val & "\""
 ]#
+
+# [in]str: "name1=val1[LF]name2=val2..."
+proc getTable(str:string): StrTable =
+  result= newTable[string,string]()
+  for nameval in str.split('\n'):
+    let pair= nameval.split('=')
+    result[pair[0]]= pair[1]
 
 proc url_to_utf8(s:string): string =
   result= newStringOfCap(s.len)
@@ -81,6 +88,8 @@ proc open_vortaroj(): DbConn =
 #proc close_vortaroj(db:DbConn) =
 #  closeDb(db)
 
+proc matchDir(filename:string): string {.inline.} =
+  existingDirs.getOrDefault(filename)
 
 proc sendFile(req:Request, filename:string) {.async.} =
       #echo "GET ", filename
@@ -221,23 +230,6 @@ proc get_req(req: Request) {.async.} =
     # TODO
     await req.respond(Http400, "rejected")
 
-  #=== Directories ===
-
-  of "/vorto/", "/vorto/index.html":
-    let html= readFile(VortoHome / "vorto.html")
-    let headers= newHttpHeaders([("content-type", "text/html")])
-    await req.respond(Http200, html, headers)
-
-  of "/foliaro/":
-    let html= readFile(WebHome / "foliaro/index.html")
-    let headers= newHttpHeaders([("content-type", "text/html")])
-    await req.respond(Http200, html, headers)
-
-  of "/foliaro/ja/":
-    let html= readFile(WebHome / "foliaro/ja/index.html")
-    let headers= newHttpHeaders([("content-type", "text/html")])
-    await req.respond(Http200, html, headers)
-
   #=== Etc ===
 
   of "/quit":
@@ -256,9 +248,17 @@ proc get_req(req: Request) {.async.} =
   #=== Send back Files / CGI ====
 
   else:
+    var filename= url_to_utf8(req.url.path)   # '%hh'->hex
+
+    #== Defined Directory?
+    if filename[^1]=='/' and (let indexfile= matchDir(filename); indexfile!=nil):
+      let html= readFile(indexfile)
+      let headers= newHttpHeaders([("content-type", "text/html")])
+      await req.respond(Http200, html, headers)
+      return
+      
     # Get the filename
-    var filename= req.url.path.substr(1)  # remove '/'
-    filename= url_to_utf8(filename) # '%hh' -> hex
+    filename= filename.substr(1)  # remove the top '/'
 
     # reject filename containing ".."
     if filename[0]=='.' or filename.contains(".."):
@@ -588,7 +588,7 @@ ini= inifile.read(appdir / IniFile)
 setCurrentDir(appdir / ini["cur_dir"])
 echo "cur.dir= ", getCurrentDir()
 WebHome= ini["web_home"]
-VortoHome= ini["vorto_home"]
+existingDirs= getTable(ini["dirs"])
 
 lg= newLogger(ini["log_file"])
 
