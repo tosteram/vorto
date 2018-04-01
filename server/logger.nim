@@ -79,6 +79,7 @@ proc newLogger* (basename:string): Logger =
   let filename= basename % gmt.format("yyyyMM")
   let f= open(filename, fmAppend)
   result= Logger(chan: chan,
+                basename: basename,
                 file: f,
                 curYear: gmt.year, curMonth: gmt.month)
   spawn log_thread(chan[].addr, result)
