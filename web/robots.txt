@@ -1,0 +1,6 @@
+User-agent: *
+Sitemap: http://www.burgiona.com/sitemap.xml
+Disallow: /foliaro/download/
+Disallow: /foliaro/images/
+Disallow: /foliaro/templates/
+Disallow: /foliaro/checkforupdate.pl?*
