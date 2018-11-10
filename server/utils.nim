@@ -48,11 +48,13 @@ proc get_GMT*(): string =
 
 #-- from mylib/utils.nim
 
+#[ ** USE getOrdefault in the strutils lib
 proc getOr* [A,B](tbl: TableRef[A,B], key:A, deflt:B): B =
   try:
     tbl[key]
   except KeyError:
     deflt
+]#
 
 proc isTrue* [A](tbl: TableRef[A,string], key:A): bool =
   tbl.hasKey(key) and tbl[key]=="true"

@@ -105,7 +105,7 @@ proc sendFile(req:Request, filename:string) {.async.} =
       let imss= req_headers.getOrDefault("if-modified-since")
                     # [weekday, day-month-year-zone]
       lg.log "*  ims=" & $imss & " file time=" & file_time_str
-      if imss!=nil:
+      if imss.len>0:
         # Once accessed
         let ims= imss[1]
         #echo "ims=", ims #debug
@@ -167,7 +167,7 @@ proc get_req(req: Request) {.async.} =
   let msg= req.hostname & "," & "GET " & req.url.path
   lg.log "*" & msg  #debug
   lg.log msg
-  
+
   case req.url.path
   of "/":
     #--- Return /index.html
@@ -238,7 +238,7 @@ proc get_req(req: Request) {.async.} =
       await sleepAsync(1000);
       quit_polling= true
     else:
-      echo "/quit rejected"
+      lg.log "*/quit rejected"
       await req.respond(Http400, "rejected")
 
   of "/host-os":
@@ -251,7 +251,8 @@ proc get_req(req: Request) {.async.} =
     var filename= url_to_utf8(req.url.path)   # '%hh'->hex
 
     #== Defined Directory?
-    if filename[^1]=='/' and (let indexfile= matchDir(filename); indexfile!=nil):
+    if filename[^1]=='/' and
+       (let indexfile= matchDir(filename); indexfile.len>0):
       let html= readFile(indexfile)
       let headers= newHttpHeaders([("content-type", "text/html")])
       await req.respond(Http200, html, headers)
@@ -411,12 +412,13 @@ proc post_req(req: Request) {.async.} =
   # search_props?range=..&match=..&offset=..&sort=(lang)
   # search?word=..&dictd=..
   # ...
-  lg.log "*" & req.body
 
   if req.url.path != "/vorto/search":
     lg.log req.hostname & "," & "POST " & req.url.path & " - bad path"
     await req.respond(Http400, "rejected")
     return
+
+  lg.log "*" & req.body
 
   var props: TableRef[string,string]      #name: range,match,offset,sort
   var where= newTable[string,seq[string]]() #word, [dictid,...]
@@ -435,7 +437,7 @@ proc post_req(req: Request) {.async.} =
         w_d= cmd_qstr[1].query_pairs
         word= w_d.getOrDefault("word")
         dict= w_d.getOrDefault("dictid")
-      if word.isNilOrEmpty or dict.isNilOrEmpty:
+      if word.len==0 or dict.len==0:
         continue
       if where.hasKey(word):
         where[word].add dict
@@ -461,8 +463,8 @@ proc post_req(req: Request) {.async.} =
   lg.log msg
 
   # check the limit : offet and count
-  let offset= props.getOr("offset", "0").parseInt
-  let limit = props.getOr("limit", "0").parseInt
+  let offset= props.getOrDefault("offset", "0").parseInt
+  let limit = props.getOrDefault("limit", "0").parseInt
   lg.log "*offset=$# limit=$#" % [$offset, $limit]  #debug
 
   if props["range"]=="entries":
@@ -597,7 +599,8 @@ try:
   let port= Port(ini["port"].parseInt)
   var server= newAsyncHttpServer()
   let serveFut= server.serve(port, routes)
-  echo "Server starts, listening on port ", port
+  lg.log "[Server starts]"
+  lg.log "*Server starts, listening on port " & $port
 
   # Open database
   #dict_db = open_vortaroj()
@@ -620,7 +623,7 @@ except:
   echo getCurrentExceptionMsg()
 
 # post-process
-lg.log "QUIT"
+lg.log "[QUIT]"
 lg.log "*[QUIT]"
 closeLogger lg
 
