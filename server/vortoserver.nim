@@ -130,15 +130,16 @@ proc sendFile(req:Request, filename:string) {.async.} =
             ])
       await req.respond(status, content, headers)
 
-
-proc callCgi(req:Request, filename:string) {.async.} =
-  let p= startProcess(filename, options={})
+#prog: __.pl or __.py
+proc callCgi(req:Request, prog:string) {.async.} =
+  let p= startProcess(prog, options={})
   var inF, outF: File
   discard open(inF, p.outputHandle, fmRead)   # handle to File
   discard open(outF, p.inputHandle, fmWrite)  # "
 
-  let querystr= url_to_utf8(req.url.query)
-  let line= "GET " & req.url.path & "?" & querystr & " HTTP/1.0"
+  #let querystr= url_to_utf8(req.url.query)
+  let line= "GET /?" & req.url.query & " HTTP/1.0"
+  lg.log "* (CGI) " & line  #debug
   outF.writeLine line
   outF.flushFile  # IMPORTANT! Needed
   let resp= inF.readAll # headers + empty_line + body
@@ -148,6 +149,7 @@ proc callCgi(req:Request, filename:string) {.async.} =
   let pos= resp.find("\r\n\r\n")
   if pos>=0:
     let body= resp.substr(pos+4)
+    lg.log "* (response) " & body  #debug
     # TODO temporary
     #let headerBlock= resp[0..<pos]
     let headers= newHttpHeaders([("content-type", "text/html")])
@@ -270,10 +272,19 @@ proc get_req(req: Request) {.async.} =
     # set filename under the WebHome
     filename= WebHome / filename
 
+    if filename.endsWith(".php"):
+      lg.log "* php file: " & filename
+      await req.respond(Http200, "You've got money, Lucky man!")
+      return
+
     # Read/Send the file
     if fileExists(filename):
       let (_, _, ext)= splitFile(filename)
-      if find([".pl", ".py"], ext) >= 0:
+      let prog= case ext
+                of ".pl": "perl"
+                of ".py": "python"
+                else: ""
+      if prog.len>0:
         discard callCgi(req, filename)
       else:
         discard sendFile(req, filename)
