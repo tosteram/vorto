@@ -19,7 +19,7 @@ from nativesockets import `$`, Port
 import osproc
 
 import mylib/inifile, mylib/sqlite3, mylib/collate
-import utils, httphelper #, templates
+import utils, httphelper, templates
 import logger
 
 
@@ -157,6 +157,9 @@ proc callCgi(req:Request, prog:string) {.async.} =
   else:
     await req.respond(Http500, "CGI Process Error")
 
+func toVer(version:string): int =
+  for v in version.split('.'):
+    result= (result shl 8) + v.parseInt
 
 #======================================
 # Routes
@@ -177,7 +180,7 @@ proc get_req(req: Request) {.async.} =
     let headers= newHttpHeaders([("content-type", "text/html")])
     await req.respond(Http200, html, headers)
 
-  #=== Dict Table ===
+  #=== /vorto ===
 
   of "/vorto/get_all_dicts":
     #--- [query]
@@ -231,6 +234,34 @@ proc get_req(req: Request) {.async.} =
   of "/vorto/reopen-db":
     # TODO
     await req.respond(Http400, "rejected")
+
+  #=== Foliaro ===
+
+  of "/foliaro/checkforupdates":
+    let
+      q= get_query(req)
+      lang= q["lang"]  # ja, en
+      ini= inifile.read(WebHome / "foliaro/checkforupdates.ini")
+      user_version= q["version"]
+      latest_version= ini["latest_version"]
+      tbl= {"lang": lang,
+            "disp_en": if lang=="ja": "none" else:"block",
+            "disp_ja": if lang=="ja": "block" else:"none",
+            "user_version": user_version,
+            "latest_version": latest_version,
+            "version_date": ini["version_date"],
+            "download_url": if lang=="ja": ini["download_url"]
+                            else: ini["download_url_en"],
+            "date": ini["date"] }.newTable
+      file= if user_version.toVer < latest_version.toVer:
+              # new version available
+              WebHome/"foliaro/newversion.htmlt"
+            else:
+              # up to date
+              WebHome/"foliaro/uptodate.htmlt"
+      html= fill_template_file(file, tbl)
+      headers= newHttpHeaders([("content-type", "text/html")])
+    await req.respond(Http200, html, headers)
 
   #=== Etc ===
 
