@@ -15,6 +15,7 @@ Compile: nim c -d:release -p:%NimMylib% vortoserver
 
 import strutils, tables, os, times, browsers, json
 import asyncdispatch, asynchttpserver
+from asyncnet import close  #close asyncSocket
 from nativesockets import `$`, Port
 import osproc
 
@@ -304,8 +305,9 @@ proc get_req(req: Request) {.async.} =
     filename= WebHome / filename
 
     if filename.endsWith(".php"):
-      lg.log "* php file: " & filename
-      await req.respond(Http200, "You've got money, Lucky man!")
+      req.client.close
+      lg.log "* disconnected: " & filename
+      #await req.respond(Http200, "You've got money, Lucky man!")
       return
 
     # Read/Send the file

@@ -8,7 +8,7 @@ Export:
   getMimeType, get_GMT
 ]#
 
-import tables, ospaths, times
+import tables, os, times
 from sequtils import anyIt
 from strutils import parseInt
 
